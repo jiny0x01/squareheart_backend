@@ -7,8 +7,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/twinj/uuid"
 )
 
 func MaxRuneCount(maxLen int) func(s string) error {
@@ -28,8 +28,8 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("uuid", uuid.UUID{}).
-			Default(uuid.New),
+		field.Uint64("user_id").
+			Unique(),
 		field.String("email").
 			Unique().
 			// Match("").
@@ -55,5 +55,7 @@ func (User) Fields() []ent.Field {
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("repositories", Repository.Type),
+	}
 }
