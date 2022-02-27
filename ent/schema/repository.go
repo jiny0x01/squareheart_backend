@@ -15,25 +15,26 @@ type Repository struct {
 
 // Fields of the Repository.
 func (Repository) Fields() []ent.Field {
-	return ent.Field{
-		field.Uint64("repo_id").
-			Unique(),
+	return []ent.Field{
+		field.Int("user_id").
+			Positive(),
 		field.String("name").
 			NotEmpty().
 			MaxLen(20),
 		field.Time("created_at").
-			Default(time.Now),
+			Default(time.Now).
+			Immutable(),
 	}
 }
 
 // Edges of the Repository.
 func (Repository) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).
+		edge.From("owner", User.Type).
 			Ref("repositories").
-			Unique(),
-		Required(),
-		Field("user_id"),
+			Unique().
+			Required().
+			Field("user_id"),
 		edge.To("records", Record.Type),
 	}
 }

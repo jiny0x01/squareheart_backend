@@ -1,20 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"html"
-	"net/http"
-
-	"github.com/jiny0x01/squareheart_backend/api/auth"
+	"github.com/gofiber/fiber/v2"
+	"github.com/jiny0x01/storylink_backend/app/controller/auth"
 )
 
 func main() {
-	fmt.Println("Server start running at 8080")
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	})
+	app := fiber.New()
+	app.Post("/signup", auth.SignUp)
 
-	http.HandleFunc("/signup", auth.SignUp)
-
-	http.ListenAndServe(":8080", nil)
+	app.Listen(":8080")
 }

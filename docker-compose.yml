@@ -3,7 +3,7 @@ services:
     postgres:
         image: postgres:13
         environment:
-            - POSTGRES_DB=storylink
+            - POSTGRES_DB=${DB_NAME}
             - POSTGRES_USER=${STORYLINK_USER}
             - POSTGRES_PASSWORD=${STORYLINK_PW}
         volumes:

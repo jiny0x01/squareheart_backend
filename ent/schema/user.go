@@ -28,8 +28,6 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("user_id").
-			Unique(),
 		field.String("email").
 			Unique().
 			// Match("").
@@ -49,7 +47,8 @@ func (User) Fields() []ent.Field {
 		field.Bool("active").
 			Default(true),
 		field.Time("created_at").
-			Default(time.Now),
+			Default(time.Now).
+			Immutable(),
 	}
 }
 
