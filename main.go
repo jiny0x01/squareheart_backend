@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"storylink_backend/app/client"
-	controller "storylink_backend/app/controller/user"
-	"storylink_backend/ent"
+
+	"github.com/jiny0x01/storylink_backend/app/client"
+	controller "github.com/jiny0x01/storylink_backend/app/controller/user"
+	"github.com/jiny0x01/storylink_backend/ent"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
