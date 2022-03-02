@@ -4,7 +4,7 @@ import (
 	"storylink_backend/app/client"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/jiny0x01/squareheart_backend/app/client"
+	"github.com/jiny0x01/storylink_bakend/app/client"
 )
 
 type SignUpDTO struct {
