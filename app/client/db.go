@@ -1,7 +1,7 @@
 package client
 
 import (
-	"storylink_backend/ent"
+	"github.com/jiny0x01/storylink_backend/ent"
 
 	_ "github.com/lib/pq"
 )
