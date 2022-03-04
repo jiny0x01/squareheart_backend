@@ -5,12 +5,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DB ent.Client
+type DB struct {
+	*ent.Client
+}
 
 var db DB
 
 func SetDB(d *DB) {
-	db = *d
+	db.Client = d.Client
 }
 
 func GetDB() *DB {

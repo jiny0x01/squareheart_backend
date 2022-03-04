@@ -32,7 +32,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	client.SetDB(db)
+	client.SetDB(&client.DB{db})
 	defer db.Close()
 
 	app := fiber.New()
