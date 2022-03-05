@@ -9,7 +9,7 @@ import (
 
 func SignUp(c *fiber.Ctx) error {
 	var dto model.SignUpDTO
-	if err := c.BodyParser(dto); err != nil {
+	if err := c.BodyParser(&dto); err != nil {
 		log.Fatalln(err)
 		return err
 	}
@@ -24,6 +24,5 @@ func SignUp(c *fiber.Ctx) error {
 
 	// TODO
 	// transfer token
-	log.Println("OK")
-	return nil
+	return c.SendString("It will be return token")
 }
