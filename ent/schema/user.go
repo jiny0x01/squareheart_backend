@@ -41,7 +41,6 @@ func (User) Fields() []ent.Field {
 			}).
 			Validate(MaxRuneCount(12)),
 		field.String("password").
-			Unique().
 			NotEmpty().
 			Sensitive(),
 		field.Bool("active").
