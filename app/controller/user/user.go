@@ -14,22 +14,29 @@ func SignUp(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
 	}
 	log.Println(dto)
-	err := model.CreateUser(c, dto)
+	userid, err := model.CreateUser(c, dto)
 	if err != nil {
 		return c.Status(fiber.StatusConflict).JSON(err.Error())
 	}
-
+	log.Printf("userid:%s\n", userid)
 	// change dto.Email to uuid
-	t, err := util.GenereateToken(dto.Email)
+	token, err := util.CreateToken(dto.Email)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(err.Error())
 	}
 
 	// regist token to redis
-	util.RegistToken()
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"token": t})
+	err = util.RegistToken(userid, token)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(err.Error())
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"access_token":  token.AccessToken,
+		"refresh_token": token.RefreshToken,
+	})
 }
 
 func SignIn(c *fiber.Ctx) error {
-
+	//token := c.Get("Authorization")
+	return nil
 }
