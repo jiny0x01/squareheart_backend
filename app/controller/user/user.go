@@ -53,7 +53,7 @@ func Refresh(c *fiber.Ctx) error {
 	// access_token이 만료되면 redis에서 access_token이 없어진다
 	// 사용자가 refresh_token을 들고 있다면 Refresh 요청을 통해 redis에 사용자의 refresh_token이 있는지 확인하고 있으면 access_token을 신규 발급한다.
 	mapToken := fiber.Map{}
-	if err := c.Bind(mapToken); err != nil {
+	if err := c.BodyParser(&mapToken); err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
 	}
 	refreshToken := mapToken["refresh_token"].(string)
@@ -85,7 +85,9 @@ func Refresh(c *fiber.Ctx) error {
 		//Delete the previous Refresh Token
 		deleted, delErr := util.DeleteAuth(refreshUuid)
 		if delErr != nil || deleted == 0 {
-			return c.Status(fiber.StatusUnauthorized).JSON(err.Error())
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "unauthorized",
+			})
 		}
 		//Create new pairs of refresh and access tokens
 		user_id := claims["user_id"].(string)

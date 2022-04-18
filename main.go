@@ -15,6 +15,7 @@ func main() {
 	app := fiber.New()
 	//	app.Use(middleware.JWTAuth)
 	app.Post("/signup", controller.SignUp)
+	app.Post("/refresh", controller.Refresh)
 
 	app.Listen(":8080")
 }
