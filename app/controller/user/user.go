@@ -4,20 +4,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	util "github.com/jiny0x01/storylink_backend/app/internal"
-	"github.com/jiny0x01/storylink_backend/app/model"
+	"github.com/jiny0x01/storylink_backend/app/models"
 )
 
 func SignUp(c *fiber.Ctx) error {
-	dto := new(model.SignUpDTO)
+	dto := new(models.SignUpDTO)
 	if err := c.BodyParser(dto); err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(err.Error())
 	}
 	log.Println(dto)
-	userid, err := model.CreateUser(c, dto)
+	userid, err := models.CreateUser(dto)
 	if err != nil {
 		return c.Status(fiber.StatusConflict).JSON(err.Error())
 	}
@@ -38,12 +39,55 @@ func SignUp(c *fiber.Ctx) error {
 	})
 }
 
+//	SignIn client 시나리오
+/*
+1. access_token, refresh_token 모두 없는 경우
+	- DB에 사용자가 있으면 토큰 재발급
+2. refresh_token만 있는경우
+	- 사용자가 Refresh endpoint에 요청하여 access_token 재발급
+3. access_token, refresh_token 모두 있는 경우
+	- access_token으로 로그인
+*/
 func SignIn(c *fiber.Ctx) error {
-	//token := c.Get("Authorization")
-	return nil
-}
+	dto := new(models.SignInDTO)
+	if err := c.BodyParser(dto); err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusUnprocessableEntity)
+	}
+	user, err := models.FindUser(dto)
+	if err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusNoContent)
+	}
 
-// TODO implement signout
+	if err := util.CompareHash(user.Password, dto.Password); err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	userid := strconv.Itoa(user.ID)
+	if _, err := util.DeleteAuth(userid); err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	token, err := util.CreateToken(userid)
+	if err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	if err := util.RegistToken(userid, token); err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	log.Printf("%s(%s) logined. Welcome\n", user.Nickname, user.Email)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"access_token":  token.AccessToken,
+		"refresh_token": token.RefreshToken,
+	})
+}
 
 func SignOut(c *fiber.Ctx) error {
 	return nil
