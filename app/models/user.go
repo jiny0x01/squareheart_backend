@@ -1,11 +1,13 @@
-package model
+package models
 
 import (
+	"log"
 	"strconv"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/jiny0x01/storylink_backend/app/client"
 	util "github.com/jiny0x01/storylink_backend/app/internal"
+	"github.com/jiny0x01/storylink_backend/ent"
+	"github.com/jiny0x01/storylink_backend/ent/user"
 )
 
 type SignUpDTO struct {
@@ -19,7 +21,7 @@ type SignInDTO struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
-func CreateUser(c *fiber.Ctx, dto *SignUpDTO) (string, error) {
+func CreateUser(dto *SignUpDTO) (string, error) {
 	pw, err := util.HashPassword(dto.Password)
 	if err != nil {
 		return "", err
@@ -36,4 +38,22 @@ func CreateUser(c *fiber.Ctx, dto *SignUpDTO) (string, error) {
 		return "", err
 	}
 	return strconv.Itoa(user.ID), nil
+}
+
+func FindUser(dto *SignInDTO) (*ent.User, error) {
+	pw, err := util.HashPassword(dto.Password)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("pw:%s\n", pw)
+	db := client.GetDB()
+	user, err := db.Client.User.
+		Query().
+		Where(
+			user.EmailEQ(dto.Email),
+		).Only(db.Ctx)
+	if err != nil {
+		return nil, err
+	}
+	return user, err
 }
