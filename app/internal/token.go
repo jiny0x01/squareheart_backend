@@ -92,13 +92,14 @@ func ExtractToken(tokenHeader string) string {
 func VerifyToken(tokenHeader string) (*jwt.Token, error) {
 	tokenString := ExtractToken(tokenHeader)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		// TODO getting access token sign from env
-		//		return []byte(os.Getenv("ACCESS_SECRET")), nil
+		// TODO change ACCESS_SECRET
 		return []byte("test_access_sign"), nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -153,11 +154,11 @@ func FindAuth(auth *AccessDetails) (string, error) {
 	return userid, nil
 }
 
-func DeleteAuth(uuid string) (int64, error) {
+func DeleteAuth(uuid string) error {
 	db := client.GetDB()
-	deleted, err := db.Redis.Del(db.Ctx, uuid).Result()
+	_, err := db.Redis.Del(db.Ctx, uuid).Result()
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return deleted, nil
+	return nil
 }
