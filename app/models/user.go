@@ -57,3 +57,11 @@ func FindUser(dto *SignInDTO) (*ent.User, error) {
 	}
 	return user, err
 }
+
+func DeleteUser(userId int) error {
+	db := client.GetDB()
+	err := db.Client.User.
+		DeleteOneID(userId).
+		Exec(db.Ctx)
+	return err
+}

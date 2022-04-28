@@ -66,7 +66,7 @@ func SignIn(c *fiber.Ctx) error {
 	}
 
 	userid := strconv.Itoa(user.ID)
-	if _, err := util.DeleteAuth(userid); err != nil {
+	if err := util.DeleteAuth(userid); err != nil {
 		log.Println(err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -90,7 +90,35 @@ func SignIn(c *fiber.Ctx) error {
 }
 
 func SignOut(c *fiber.Ctx) error {
-	return nil
+	ad, err := util.ExtractTokenMetadata(c.Get("Authorization"))
+	if err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	userId, err := util.FindAuth(ad)
+	if err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	err = util.DeleteAuth(userId)
+	if err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	user_id, err := strconv.Atoi(userId)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	if err := models.DeleteUser(user_id); err != nil {
+		return c.SendStatus(fiber.StatusConflict)
+	}
+
+	log.Printf("user_id:%s SignOut. Bye~\n", userId)
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func Refresh(c *fiber.Ctx) error {
@@ -127,8 +155,8 @@ func Refresh(c *fiber.Ctx) error {
 		}
 
 		//Delete the previous Refresh Token
-		deleted, delErr := util.DeleteAuth(refreshUuid)
-		if delErr != nil || deleted == 0 {
+		delErr := util.DeleteAuth(refreshUuid)
+		if delErr != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "unauthorized",
 			})
